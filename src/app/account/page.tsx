@@ -19,6 +19,23 @@ import {
 } from "lucide-react";
 import { isValidEmail } from "@/utils/validation";
 
+interface Order {
+  id: string;
+  date: string;
+  status: 'Processing' | 'Shipping' | 'Delivered' | 'Failed';
+  paymentStatus: 'pending' | 'completed' | 'failed';
+  paymentMode: string;
+  total: number;
+  items: {
+    id: string;
+    name: string;
+    image: string;
+    quantity: number;
+    price: number;
+    subtotal: number;
+  }[];
+}
+
 interface Address {
   id: string;
   fullName: string;
@@ -36,12 +53,12 @@ export default function AccountPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("profile");
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState("");
   const [profileImage, setProfileImage] = useState("/images/default-avatar.jpg");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [editingAddress, setEditingAddress] = useState(null);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [newAddress, setNewAddress] = useState({
     fullName: "",
@@ -58,11 +75,11 @@ export default function AccountPage() {
       const response = await fetch(`/api/user/address?id=${addressId}`, {
         method: 'DELETE',
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to delete address');
       }
-  
+
       setAddresses(addresses.filter(addr => addr.id !== addressId));
       setToastMessage('Address deleted successfully');
       setToastType('success');
@@ -74,7 +91,83 @@ export default function AccountPage() {
       setShowToast(true);
     }
   };
-  
+
+  const handleChangePassword = () => {
+    setPasswordForm({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setPasswordErrors({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setIsPasswordModalOpen(true);
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordErrors({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+
+    // Validate password fields
+    let hasError = false;
+    if (!passwordForm.currentPassword) {
+      setPasswordErrors(prev => ({ ...prev, currentPassword: 'Current password is required' }));
+      hasError = true;
+    }
+    if (!passwordForm.newPassword) {
+      setPasswordErrors(prev => ({ ...prev, newPassword: 'New password is required' }));
+      hasError = true;
+    } else if (passwordForm.newPassword.length < 8) {
+      setPasswordErrors(prev => ({ ...prev, newPassword: 'Password must be at least 8 characters long' }));
+      hasError = true;
+    }
+    if (!passwordForm.confirmPassword) {
+      setPasswordErrors(prev => ({ ...prev, confirmPassword: 'Please confirm your new password' }));
+      hasError = true;
+    } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordErrors(prev => ({ ...prev, confirmPassword: 'Passwords do not match' }));
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    setIsPasswordLoading(true);
+    try {
+      const response = await fetch('/api/user/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to change password');
+      }
+
+      setToastMessage('Password changed successfully');
+      setToastType('success');
+      setShowToast(true);
+      setIsPasswordModalOpen(false);
+    } catch (error: any) {
+      setToastMessage(error.message || 'Failed to change password');
+      setToastType('error');
+      setShowToast(true);
+    } finally {
+      setIsPasswordLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       // Clear all items from localStorage
@@ -117,6 +210,18 @@ export default function AccountPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordErrors, setPasswordErrors] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -190,7 +295,7 @@ export default function AccountPage() {
     }
   }, [router, activeTab]);
 
-  
+
 
   if (isLoading) {
     return <Preloader />;
@@ -229,13 +334,13 @@ export default function AccountPage() {
       }
 
       const savedAddress = await response.json();
-      
+
       if (editingAddress) {
         setAddresses(addresses.map(addr => addr.id === savedAddress.id ? savedAddress : addr));
       } else {
         setAddresses([...addresses, savedAddress]);
       }
-      
+
       setIsAddressModalOpen(false);
       setToastMessage(`Address ${editingAddress ? 'updated' : 'added'} successfully`);
       setToastType('success');
@@ -303,9 +408,9 @@ export default function AccountPage() {
     }
   };
 
- 
 
- 
+
+
   const fetchAddressDetails = async (pincode: string) => {
     if (pincode.length === 6) {
       setIsLoadingPincode(true);
@@ -359,13 +464,10 @@ export default function AccountPage() {
   // Handle profile input changes
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === "email") return; // Prevent email changes
+
     let formattedValue = value;
     let error = "";
-
-    // Validate email
-    if (name === "email" && value && !isValidEmail(value)) {
-      error = "Please enter a valid email address";
-    }
 
     // Validate phone number
     if (name === "phoneNumber" && value) {
@@ -387,62 +489,63 @@ export default function AccountPage() {
 
     const hasChanges = Object.keys(profileSettings).some(
       (key) =>
+        key !== "email" && // Exclude email from change detection
         profileSettings[key as keyof typeof profileSettings] !==
         originalSettings[key as keyof typeof originalSettings]
     );
 
     setIsProfileChanged(hasChanges);
     setIsUnsavedChanges(hasChanges);
-};
-
-const handleProfileSave = async () => {
-  // Validate all fields before saving
-  const errors = {
-    email: !isValidEmail(profileSettings.email) ? "Please enter a valid email address" : "",
-    phoneNumber: profileSettings.phoneNumber.length !== 10 ? "Please enter a valid phone number" : "",
   };
 
-  setValidationErrors(errors);
+  const handleProfileSave = async () => {
+    // Validate all fields before saving
+    const errors = {
+      email: !isValidEmail(profileSettings.email) ? "Please enter a valid email address" : "",
+      phoneNumber: profileSettings.phoneNumber.length !== 10 ? "Please enter a valid phone number" : "",
+    };
 
-  if (Object.values(errors).some((error) => error)) {
-    return;
-  }
+    setValidationErrors(errors);
 
-  try {
-    const response = await fetch('/api/user/profile', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profileSettings),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update profile');
+    if (Object.values(errors).some((error) => error)) {
+      return;
     }
 
-    const updatedUser = await response.json();
-    setOriginalSettings(updatedUser);
-    setProfileSettings(updatedUser);
-    setIsProfileChanged(false);
-    setIsUnsavedChanges(false);
-    
-    setToastMessage('Profile updated successfully');
-    setToastType('success');
-    setShowToast(true);
-  } catch (error) {
-    // console.error("Error saving profile:", error);
-    setToastMessage('Failed to update profile');
-    setToastType('error');
-    setShowToast(true);
-  }
-};
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileSettings),
+      });
 
-// Handle profile save
-const handleProfileSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  await handleProfileSave();
-};
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      const updatedUser = await response.json();
+      setOriginalSettings(updatedUser);
+      setProfileSettings(updatedUser);
+      setIsProfileChanged(false);
+      setIsUnsavedChanges(false);
+
+      setToastMessage('Profile updated successfully');
+      setToastType('success');
+      setShowToast(true);
+    } catch (error) {
+      // console.error("Error saving profile:", error);
+      setToastMessage('Failed to update profile');
+      setToastType('error');
+      setShowToast(true);
+    }
+  };
+
+  // Handle profile save
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleProfileSave();
+  };
 
   const menuItems = [
     { id: "profile", label: "Profile Information", icon: User },
@@ -504,8 +607,8 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
                       className={`flex flex-col items-center justify-center p-2 rounded-lg text-sm ${activeTab === item.id
-                          ? "bg-gray-100 text-gray-700"
-                          : "text-gray-700 hover:bg-gray-50"
+                        ? "bg-gray-100 text-gray-700"
+                        : "text-gray-700 hover:bg-gray-50"
                         }`}
                     >
                       <Icon className="w-5 h-5 mb-1" />
@@ -593,7 +696,7 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
                 <div className="bg-white rounded-lg shadow p-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
                   <div className="space-y-6">
-                    
+
                     {/* Profile Form */}
                     <form onSubmit={handleProfileSubmit} className="space-y-4">
                       <div>
@@ -621,12 +724,10 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
                           id="email"
                           name="email"
                           value={profileSettings.email}
-                          onChange={handleProfileChange}
-                          className="w-full px-4 py-3 text-gray-900 bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ease-in-out placeholder-gray-400 hover:border-gray-400 ${validationErrors.email ? 'border-red-500 focus:ring-red-500' : ''}"
-                          placeholder="Enter your email"
+                          readOnly
+                          disabled
+                          className="w-full px-4 py-3 text-gray-900 bg-gray-100 border border-gray-300 rounded-lg cursor-not-allowed"
                           aria-label="Email Address"
-                          aria-invalid={!!validationErrors.email}
-                          aria-describedby={validationErrors.email ? 'email-error' : undefined}
                         />
                         {validationErrors.email && (
                           <p id="email-error" className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
@@ -654,15 +755,25 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
                           <p id="phone-error" className="mt-1 text-sm text-red-600">{validationErrors.phoneNumber}</p>
                         )}
                       </div>
-
-                      <div className="flex justify-end">
-                        <button
-                          type="submit"
-                          className="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
-                          disabled={!isProfileChanged}
-                        >
-                          Save Changes
-                        </button>
+                      <div className="flex w-full justify-end">
+                        <div className="flex justify-end mr-3">
+                          <button
+                            type="button"
+                            className="bg-gray-50 text-gray-800 border border-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
+                            onClick={handleChangePassword}
+                          >
+                            Change Password
+                          </button>
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            type="submit"
+                            className="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+                            disabled={!isProfileChanged}
+                          >
+                            Save Changes
+                          </button>
+                        </div>
                       </div>
                     </form>
                   </div>
@@ -755,7 +866,7 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
                       onClick={() => setIsAddressModalOpen(true)}
                       className="flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <Plus size={15} className="mr-2"/>
+                      <Plus size={15} className="mr-2" />
                       Add New Address
                     </button>
                   </div>
@@ -768,11 +879,11 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {addresses.map((address: any) => (
                         <div key={address.id} className="p-4 border rounded-lg shadow-sm relative">
-                            {address.isDefault && (
-                              <span className="absolute top-2 top-24 right-3 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                Default
-                              </span>
-                            )}
+                          {address.isDefault && (
+                            <span className="absolute top-2 top-24 right-3 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Default
+                            </span>
+                          )}
                           <div className="flex justify-between items-start mb-2">
                             <h3 className="text-gray-700 font-md">{address.label}</h3>
                             <div className="flex space-x-2">
@@ -814,17 +925,17 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
                                           isDefault: true
                                         }),
                                       });
-                                      
+
                                       if (!response.ok) {
                                         throw new Error('Failed to update address');
                                       }
-                                      
+
                                       const updatedAddress = await response.json();
                                       setAddresses(addresses.map(addr => ({
                                         ...addr,
                                         isDefault: addr.id === address.id
                                       })));
-                                      
+
                                       setToastMessage('Address set as default');
                                       setToastType('success');
                                       setShowToast(true);
@@ -870,7 +981,7 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
         </button>
       </div>
 
-     
+
       <Toast
         message={toastMessage}
         type={toastType}
@@ -878,6 +989,90 @@ const handleProfileSubmit = async (e: React.FormEvent) => {
         onClose={() => setShowToast(false)}
         duration={3000}
       />
+
+      {/* Password Change Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="fixed inset-0 bg-black opacity-30" onClick={() => setIsPasswordModalOpen(false)}></div>
+            <div className="relative bg-white rounded-lg w-full max-w-md p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Change Password</h2>
+                <button
+                  onClick={() => setIsPasswordModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    id="currentPassword"
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                    className="mt-1 text-gray-700 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  {passwordErrors.currentPassword && (
+                    <p className="mt-1 text-sm text-red-600">{passwordErrors.currentPassword}</p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    id="newPassword"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                    className="mt-1 text-gray-700 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  {passwordErrors.newPassword && (
+                    <p className="mt-1 text-sm text-red-600">{passwordErrors.newPassword}</p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className="mt-1 text-gray-700 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  {passwordErrors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-600">{passwordErrors.confirmPassword}</p>
+                  )}
+                </div>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsPasswordModalOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isPasswordLoading}
+                    className="px-4 py-2 text-sm font-medium text-white bg-gray-900 border border-transparent rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isPasswordLoading ? 'Changing...' : 'Change Password'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Address Modal */}
       {isAddressModalOpen && (

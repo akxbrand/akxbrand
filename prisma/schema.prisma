@@ -300,8 +300,6 @@ model BulkOrderProduct {
   name        String
   description String
   minQuantity Int
-  regularPrice Float
-  pricePerUnit Float
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

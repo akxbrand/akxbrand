@@ -109,7 +109,10 @@ export default function Header({ onMobileMenuClick }: HeaderProps) {
             </Link>
 
             {/* Categories Dropdown */}
-            <div className='py-2'><CategoryMenu /></div>
+            <div className='py-2'>
+              <CategoryMenu />
+            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gray-900 transform origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100" />
+            </div>
 
             {/* <div className="relative group">
               <button className="relative text-gray-700 hover:text-gray-900 transition-colors duration-200 py-2 group">

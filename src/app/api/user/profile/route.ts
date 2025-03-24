@@ -48,10 +48,18 @@ export async function PUT(request: NextRequest) {
     const data = await request.json();
     
     // Validate required fields
-    if (!data.name || !data.email || !data.phoneNumber) {
+    if (!data.name || !data.phoneNumber) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
+      );
+    }
+
+    // Prevent email updates
+    if (data.email && data.email !== session.user.email) {
+      return NextResponse.json(
+        { error: 'Email cannot be modified' },
+        { status: 403 }
       );
     }
 
@@ -60,7 +68,6 @@ export async function PUT(request: NextRequest) {
       where: { email: session.user.email },
       data: {
         name: data.name,
-        email: data.email,
         phoneNumber: data.phoneNumber,
         ...(data.image && { image: data.image })
       },

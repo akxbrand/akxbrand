@@ -4,12 +4,12 @@ import prisma from '@/lib/prisma';
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { name, description, minQuantity, regularPrice, pricePerUnit } = data;
+    const { name, description, minQuantity} = data;
 
     // Validate required fields
-    if (!name || !description || !minQuantity || !regularPrice || !pricePerUnit) {
+    if (!name || !description || !minQuantity) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Name, description and minimum quantity are required' },
         { status: 400 }
       );
     }
@@ -22,27 +22,11 @@ export async function POST(request: Request) {
       );
     }
 
-    if (regularPrice <= 0 || pricePerUnit <= 0) {
-      return NextResponse.json(
-        { error: 'Prices must be greater than 0' },
-        { status: 400 }
-      );
-    }
-
-    if (pricePerUnit >= regularPrice) {
-      return NextResponse.json(
-        { error: 'Bulk price per unit must be less than regular price' },
-        { status: 400 }
-      );
-    }
-
     const bulkProduct = await prisma.bulkOrderProduct.create({
       data: {
         name,
         description,
         minQuantity,
-        regularPrice,
-        pricePerUnit,
       },
     });
 
@@ -77,7 +61,7 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const data = await request.json();
-    const { id, name, description, minQuantity, regularPrice, pricePerUnit } = data;
+    const { id, name, description, minQuantity} = data;
 
     if (!id) {
       return NextResponse.json(
@@ -87,9 +71,9 @@ export async function PUT(request: Request) {
     }
 
     // Validate required fields
-    if (!name || !description || !minQuantity || !regularPrice || !pricePerUnit) {
+    if (!name || !description || !minQuantity) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Name, description and minimum quantity are required' },
         { status: 400 }
       );
     }
@@ -102,28 +86,12 @@ export async function PUT(request: Request) {
       );
     }
 
-    if (regularPrice <= 0 || pricePerUnit <= 0) {
-      return NextResponse.json(
-        { error: 'Prices must be greater than 0' },
-        { status: 400 }
-      );
-    }
-
-    if (pricePerUnit >= regularPrice) {
-      return NextResponse.json(
-        { error: 'Bulk price per unit must be less than regular price' },
-        { status: 400 }
-      );
-    }
-
     const updatedProduct = await prisma.bulkOrderProduct.update({
       where: { id },
       data: {
         name,
         description,
         minQuantity,
-        regularPrice,
-        pricePerUnit,
       },
     });
 

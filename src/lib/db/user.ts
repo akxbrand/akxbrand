@@ -182,5 +182,18 @@ export const userDb = {
       console.error('Error listing users:', error);
       throw new Error(error.message || 'Failed to list users');
     }
+  },
+
+  // Update user password
+  updatePassword: async (id: string, hashedPassword: string) => {
+    try {
+      return await prisma.user.update({
+        where: { id },
+        data: { password: hashedPassword }
+      });
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      throw new Error(error.message || 'Failed to update password');
+    }
   }
 };

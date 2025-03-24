@@ -227,20 +227,20 @@ export default function AnnouncementsPage() {
                     required
                     value={newAnnouncement.startDate}
                     onChange={(e) => setNewAnnouncement({ ...newAnnouncement, startDate: e.target.value })}
-                    className="mt-1 text-gray-700 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 p-2 text-gray-700 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-                    End Date (Optional)
+                    End Date
                   </label>
                   <input
                     type="datetime-local"
                     id="endDate"
                     value={newAnnouncement.endDate}
                     onChange={(e) => setNewAnnouncement({ ...newAnnouncement, endDate: e.target.value })}
-                    className="mt-1 block text-gray-700 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 p-2 block text-gray-700 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 </div>
 
@@ -255,7 +255,7 @@ export default function AnnouncementsPage() {
                     min="0"
                     value={newAnnouncement.priority}
                     onChange={(e) => setNewAnnouncement({ ...newAnnouncement, priority: parseInt(e.target.value) })}
-                    className="mt-1 text-gray-700 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    className="mt-1 p-2 text-gray-700 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 </div>
               </div>

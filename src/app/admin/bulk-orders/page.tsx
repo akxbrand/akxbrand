@@ -40,9 +40,7 @@ export default function BulkOrdersPage() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    minQuantity: '',
-    pricePerUnit: '',
-    regularPrice: ''
+    minQuantity: ''
   });
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
@@ -52,10 +50,7 @@ export default function BulkOrdersPage() {
     if (!formData.description) newErrors.description = 'Description is required';
     if (!formData.minQuantity) newErrors.minQuantity = 'Minimum quantity is required';
     else if (Number(formData.minQuantity) < 1) newErrors.minQuantity = 'Minimum quantity must be at least 1';
-    if (!formData.regularPrice) newErrors.regularPrice = 'Regular price is required';
-    else if (Number(formData.regularPrice) <= 0) newErrors.regularPrice = 'Regular price must be greater than 0';
-    if (!formData.pricePerUnit) newErrors.pricePerUnit = 'Bulk price per unit is required';
-    else if (Number(formData.pricePerUnit) <= 0) newErrors.pricePerUnit = 'Bulk price must be greater than 0';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -66,9 +61,7 @@ export default function BulkOrdersPage() {
 
     const submitData = {
       ...formData,
-      minQuantity: parseInt(formData.minQuantity),
-      pricePerUnit: parseFloat(formData.pricePerUnit),
-      regularPrice: parseFloat(formData.regularPrice)
+      minQuantity: parseInt(formData.minQuantity)
     };
 
     try {
@@ -90,7 +83,7 @@ export default function BulkOrdersPage() {
         toast.success('Bulk order product added successfully');
       }
 
-      setFormData({ name: '', description: '', minQuantity: '', pricePerUnit: '', regularPrice: '' });
+      setFormData({ name: '', description: '', minQuantity: '' });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'An error occurred');
       console.error('Error:', error);
@@ -121,9 +114,7 @@ export default function BulkOrdersPage() {
     setFormData({
       name: product.name,
       description: product.description,
-      minQuantity: product.minQuantity.toString(),
-      pricePerUnit: product.pricePerUnit.toString(),
-      regularPrice: product.regularPrice.toString()
+      minQuantity: product.minQuantity.toString()
     });
   };
 
@@ -169,35 +160,7 @@ export default function BulkOrdersPage() {
                     {errors.minQuantity && <p className="mt-2 text-sm text-red-600">{errors.minQuantity}</p>}
                   </div>
 
-                  <div>
-                    <label htmlFor="regularPrice" className="block text-sm font-medium text-gray-700 mb-2">Regular Price (₹/unit)</label>
-                    <input
-                      type="number"
-                      id="regularPrice"
-                      value={formData.regularPrice}
-                      onChange={(e) => setFormData(prev => ({ ...prev, regularPrice: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition duration-200 ease-in-out hover:border-gray-400 text-gray-900 text-base"
-                      placeholder="Enter regular price per unit"
-                      step="0.01"
-                      min="0"
-                    />
-                    {errors.regularPrice && <p className="mt-2 text-sm text-red-600">{errors.regularPrice}</p>}
-                  </div>
 
-                  <div>
-                    <label htmlFor="pricePerUnit" className="block text-sm font-medium text-gray-700 mb-2">Bulk Price (₹/unit)</label>
-                    <input
-                      type="number"
-                      id="pricePerUnit"
-                      value={formData.pricePerUnit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, pricePerUnit: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition duration-200 ease-in-out hover:border-gray-400 text-gray-900 text-base"
-                      placeholder="Enter bulk price per unit"
-                      step="0.01"
-                      min="0"
-                    />
-                    {errors.pricePerUnit && <p className="mt-2 text-sm text-red-600">{errors.pricePerUnit}</p>}
-                  </div>
 
                   <div>
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Description</label>
@@ -225,7 +188,7 @@ export default function BulkOrdersPage() {
                       type="button"
                       onClick={() => {
                         setEditingProduct(null);
-                        setFormData({ name: '', description: '', minQuantity: '', pricePerUnit: '', regularPrice: '' });
+                        setFormData({ name: '', description: '', minQuantity: '' });
                       }}
                       className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
@@ -247,7 +210,7 @@ export default function BulkOrdersPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Min. Quantity</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price/Unit</th>
+                    {/* <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price/Unit</th> */}
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
@@ -273,9 +236,7 @@ export default function BulkOrdersPage() {
                           {product.description}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">{product.minQuantity}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                          ₹{product.pricePerUnit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </td>
+                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">-</td> */}
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
                           {new Date(product.createdAt).toLocaleDateString()}
                         </td>
