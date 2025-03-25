@@ -1,4 +1,4 @@
-import { NextConfig } from 'next';
+
 import nextConfig from '../../next.config';
 
 interface ValidationResult {
@@ -37,6 +37,7 @@ export const validateImageUrl = (url: string): ValidationResult => {
 
     return { isValid: true };
   } catch (error) {
+    console.error('Error validating image URL:', error);
     return {
       isValid: false,
       error: 'Invalid URL format'

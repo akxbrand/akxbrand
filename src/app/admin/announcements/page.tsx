@@ -17,6 +17,10 @@ interface Announcement {
   updatedAt: Date;
 }
 
+interface ApiError {
+  message: string;
+}
+
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,10 +36,7 @@ export default function AnnouncementsPage() {
     priority: 0
   });
 
-  useEffect(() => {
-    fetchAnnouncements();
-  }, []);
-
+ 
   const showToastMessage = (message: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(message);
     setToastType(type);
@@ -49,12 +50,16 @@ export default function AnnouncementsPage() {
       const { success, announcements: data, error } = await response.json();
       if (!success) throw new Error(error || 'Failed to fetch announcements');
       setAnnouncements(data);
-    } catch (error: any) {
-      showToastMessage(error.message || 'Error fetching announcements', 'error');
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      showToastMessage(apiError.message || 'Failed to fetch announcements', 'error');
     } finally {
       setIsLoading(false);
     }
   };
+  useEffect(() => {
+    fetchAnnouncements();
+  }, [fetchAnnouncements]);
 
   const handleEdit = (announcement: Announcement) => {
     setEditingAnnouncement(announcement);
@@ -124,7 +129,7 @@ export default function AnnouncementsPage() {
     }
   };
 
-  const handleStatusToggle = async (id: string, currentStatus: string) => {
+  const handleStatusToggle = async (id: string) => {
     try {
       const response = await fetch(`/api/admin/announcements/${id}/toggle`, {
         method: 'PUT',
@@ -137,8 +142,9 @@ export default function AnnouncementsPage() {
 
       await fetchAnnouncements();
       showToastMessage('Announcement status updated successfully');
-    } catch (error: any) {
-      showToastMessage(error.message || 'Error updating announcement status', 'error');
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      showToastMessage(apiError.message || 'Error updating announcement status', 'error');
     }
   };
 
@@ -157,8 +163,9 @@ export default function AnnouncementsPage() {
 
       await fetchAnnouncements();
       showToastMessage('Announcement deleted successfully');
-    } catch (error: any) {
-      showToastMessage(error.message || 'Error deleting announcement', 'error');
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      showToastMessage(apiError.message || 'Error deleting announcement', 'error');
     }
   };
 

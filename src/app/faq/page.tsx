@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Layout from "@/components/layout/Layout";
-import { Truck, CreditCard, RefreshCcw, HelpCircle, ChevronDown, ChevronUp, ShieldCheck, Clock, Globe, Phone, Mail, MessageSquare } from "lucide-react";
-import Link from "next/link";
+import { Truck, RefreshCcw, HelpCircle, ChevronDown, ChevronUp, ShieldCheck, Phone, Mail } from "lucide-react";
+
 
 export default function FAQPage() {
   // FAQ Categories with their respective questions and answers
@@ -71,7 +70,6 @@ export default function FAQPage() {
     },
   ];
 
-  const activeCategory = categories[0]; // Default to showing shipping questions
 
   return (
     <Layout>
@@ -190,18 +188,8 @@ export default function FAQPage() {
             <p className="text-gray-600 mb-8">
               Our customer support team is here to help
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto mb-12">
-              {/* Live Chat */}
-              <div className="bg-gradient-to-br from-white to-blue-50 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-blue-100">
-                <div className="flex justify-center mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-colors duration-300">
-                    <MessageSquare className="w-10 h-10 text-blue-600" />
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Live Chat</h3>
-                <p className="text-sm text-gray-600">Chat with our support team</p>
-                <button className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300" onClick={()=>{console.log('hello world')}}>Start Chat</button>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto mb-12">
+              {/* Phone */}
               <div className="bg-gradient-to-br from-white to-blue-50 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-blue-100">
                 <div className="flex justify-center mb-6">
                   <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-colors duration-300">
@@ -222,7 +210,7 @@ export default function FAQPage() {
                   </div>
                 </div>
                 <h3 className="font-bold text-gray-900 mb-3 text-xl">Email Support</h3>
-                <p className="text-gray-600 mb-4 text-base">We'll respond within 24 hours</p>
+                <p className="text-gray-600 mb-4 text-base">We&apos;ll respond within 24 hours</p>
                 <a href="mailto:support@example.com" className="text-blue-600 hover:text-blue-700 font-medium text-lg hover:underline transition-all duration-200">
                   akxbrand@gmail.com
                 </a>

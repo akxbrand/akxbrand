@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from "next/link";
-import { FaFacebookF, FaTwitter, FaInstagram, FaPinterestP } from 'react-icons/fa';
+import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 
@@ -44,7 +44,6 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Company Info */}
           <div>
-            {/* <h3 className="text-2xl font-bold mb-4">AKX Brand</h3> */}
             <Link 
               href="/" 
               className="text-xl font-bold text-gray-900 hover:text-gray-700 transition-colors duration-200"
@@ -59,7 +58,7 @@ export default function Footer() {
             />
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed">
-              Premium bedding essentials for your perfect night's rest.
+              Premium bedding essentials for your perfect night&apos;s rest.
             </p>
           </div>
 

@@ -98,7 +98,7 @@ export default function NetworkError() {
               Network Connection Error
             </h2>
             <p className="text-gray-600 text-base sm:text-lg md:text-xl max-w-md mx-auto">
-              We're having trouble connecting to our servers. Please check your internet connection and try again.
+              We&apos;re having trouble connecting to our servers. Please check your internet connection and try again.
             </p>
             <motion.button
               whileHover={{ scale: 1.03 }}

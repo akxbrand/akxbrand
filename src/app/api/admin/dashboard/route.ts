@@ -8,7 +8,11 @@ export async function GET() {
       select: {
         total: true,
         status: true,
-        createdAt: true
+        createdAt: true,
+        paymentStatus: true
+      },
+      where: {
+        paymentStatus: 'completed'
       }
     });
 

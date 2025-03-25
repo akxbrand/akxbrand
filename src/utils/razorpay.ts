@@ -1,6 +1,11 @@
+import { RazorpayOptions, RazorpayOrderData, RazorpayOrderResponse } from '../types/razorpay';
+
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => {
+      open: () => void;
+      close: () => void;
+    };
   }
 }
 
@@ -14,7 +19,7 @@ export const loadScript = (src: string): Promise<boolean> => {
   });
 };
 
-export const initializeRazorpay = async (options: any): Promise<any> => {
+export const initializeRazorpay = async (options: RazorpayOptions): Promise<{ open: () => void; close: () => void }> => {
   const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
 
   if (!res) {
@@ -25,7 +30,7 @@ export const initializeRazorpay = async (options: any): Promise<any> => {
   return razorpay;
 };
 
-export const createRazorpayOrder = async (orderData: any) => {
+export const createRazorpayOrder = async (orderData: RazorpayOrderData): Promise<RazorpayOrderResponse> => {
   try {
     const response = await fetch('/api/payment/create-order', {
       method: 'POST',

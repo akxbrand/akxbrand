@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import React from 'react';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 // GET /api/admin/coupons/:id
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = React.use(params);
+  // const { id } = React.use(params);
   try {
     const session = await getServerSession(authOptions);
     

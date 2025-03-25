@@ -6,7 +6,6 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import OrderStatusModal from '@/components/admin/OrderStatusModal';
 import ViewOrderModal from '@/components/admin/ViewOrderModal';
 import { Eye, Download, FileSpreadsheet } from 'lucide-react';
-import prisma from '@/lib/prisma';
 
 type OrderStatus = 'Delivered' | 'Processing' | 'Shipping' | 'Pending' | 'Failed';
 
@@ -114,13 +113,123 @@ export default function OrdersPage() {
     document.body.removeChild(link);
   };
 
-  const handleDownloadInvoice = (orderId: string) => {
+  const handleDownloadInvoice = async (orderId: string) => {
     try {
-      // Simulating invoice download
+      const response = await fetch(`/api/admin/orders/${orderId}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch order details');
+      }
+
+      const orderDetails = {
+        id: data.id,
+        customerName: data.user.name,
+        email: data.user.email,
+        phone: data.user.phoneNumber,
+        address: data.shippingAddress,
+        items: data.items.map((item: any) => ({
+          id: item.id,
+          name: item.product.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.product.images[0] || '/images/placeholder.jpg'
+        })),
+        total: data.total,
+        orderDate: new Date(data.createdAt).toLocaleDateString(),
+        status: data.status,
+        paymentMethod: data.paymentMode || 'Not specified',
+        paymentStatus: data.paymentStatus
+      };
+
+      // Create invoice content using template literals
+      const invoiceContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Invoice - ${orderDetails.id}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .invoice-header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+              .total-section { margin-top: 30px; text-align: right; }
+            </style>
+          </head>
+          <body>
+            <div class="invoice-header">
+              <div>
+                <h2>INVOICE</h2>
+                <p>Order #${orderDetails.id}</p>
+                <p>Date: ${orderDetails.orderDate}</p>
+              </div>
+              <div style="text-align: right;">
+                <h3>AKX Brand</h3>
+                <p>33/10 Matta Chowk, Rani Mahal</p>
+                <p>Panipat, Haryana 132103</p>
+                <p>GSTIN: 06BPQPR1739P1ZZ</p>
+              </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+              <h4>Bill To:</h4>
+              <p>${orderDetails.customerName}</p>
+              <p>${orderDetails.email}</p>
+              <p>${orderDetails.phone || 'N/A'}</p>
+              <p>${orderDetails.address?.street || ''}</p>
+              <p>${orderDetails.address?.city || ''}, ${orderDetails.address?.state || ''} ${orderDetails.address?.zipCode || ''}</p>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${orderDetails.items.map(item => `
+                  <tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.price.toLocaleString('en-IN')}</td>
+                    <td>₹${(item.price * item.quantity).toLocaleString('en-IN')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+
+            <div class="total-section">
+              <h3>Total: ₹${orderDetails.total.toLocaleString('en-IN')}</h3>
+              <p>Payment Method: ${orderDetails.paymentMethod}</p>
+              <p>Payment Status: ${orderDetails.paymentStatus}</p>
+            </div>
+          </body>
+        </html>
+      `;
+
+      // Create a Blob with the invoice content
+      const blob = new Blob([invoiceContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+
+      // Create a link element and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${orderDetails.id}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up the URL object
+      URL.revokeObjectURL(url);
+
       setToastMessage('Invoice downloaded successfully');
       setToastType('success');
       setShowToast(true);
     } catch (error) {
+      console.error('Error downloading invoice:', error);
       setToastMessage('Error downloading invoice');
       setToastType('error');
       setShowToast(true);

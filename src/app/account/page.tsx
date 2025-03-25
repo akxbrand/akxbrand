@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import { useRouter } from 'next/navigation';
@@ -18,7 +18,9 @@ import {
   Edit
 } from "lucide-react";
 import { isValidEmail } from "@/utils/validation";
-
+interface ApiError {
+  message: string;
+}
 interface Order {
   id: string;
   date: string;
@@ -55,11 +57,9 @@ export default function AccountPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState("");
-  const [profileImage, setProfileImage] = useState("/images/default-avatar.jpg");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [newAddress, setNewAddress] = useState({
     fullName: "",
     phone: "",
@@ -159,8 +159,9 @@ export default function AccountPage() {
       setToastType('success');
       setShowToast(true);
       setIsPasswordModalOpen(false);
-    } catch (error: any) {
-      setToastMessage(error.message || 'Failed to change password');
+    } catch (error: unknown) {
+      const apiError = error as ApiError;
+      setToastMessage(apiError.message || 'Failed to change password');
       setToastType('error');
       setShowToast(true);
     } finally {
@@ -181,16 +182,11 @@ export default function AccountPage() {
         callbackUrl: '/login'
       });
     } catch (error) {
-      // console.error('Logout failed:', error);
-      // Show error notification to user
       setToastMessage('Failed to logout. Please try again.');
-      setToastType('error');
       setShowToast(true);
     }
   };
 
-  const [isLoadingPincode, setIsLoadingPincode] = useState(false);
-  const [pincodeError, setPincodeError] = useState("");
   const [profileSettings, setProfileSettings] = useState({
     name: "",
     email: "",
@@ -206,7 +202,6 @@ export default function AccountPage() {
     email: "",
     phoneNumber: "",
   });
-  const [isUnsavedChanges, setIsUnsavedChanges] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
@@ -260,9 +255,7 @@ export default function AccountPage() {
         const userData = await response.json();
         setProfileSettings(userData);
         setOriginalSettings(userData);
-        if (userData.image) {
-          setProfileImage(userData.image);
-        }
+        
         setIsAuthenticated(true);
       } catch (error) {
         // console.error('Error fetching user profile:', error);
@@ -371,8 +364,6 @@ export default function AccountPage() {
       const sanitizedValue = value.replace(/\D/g, '').slice(0, 6);
       setNewAddress(prev => ({ ...prev, [name]: sanitizedValue }));
       if (sanitizedValue.length === 6) {
-        setIsLoadingPincode(true);
-        setPincodeError('');
         try {
           const response = await fetch(`https://api.postalpincode.in/pincode/${sanitizedValue}`);
           const data = await response.json();
@@ -385,7 +376,6 @@ export default function AccountPage() {
               state: postOffice.State,
             }));
           } else {
-            setPincodeError('Invalid PIN code. Please enter city and state manually.');
             setNewAddress(prev => ({
               ...prev,
               city: '',
@@ -393,71 +383,17 @@ export default function AccountPage() {
             }));
           }
         } catch (error) {
-          setPincodeError('Error fetching address details. Please enter city and state manually.');
           setNewAddress(prev => ({
             ...prev,
             city: '',
             state: '',
           }));
         } finally {
-          setIsLoadingPincode(false);
+          console.error('Error fetching address details:', error);
         }
       }
     } else {
       setNewAddress(prev => ({ ...prev, [name]: value }));
-    }
-  };
-
-
-
-
-  const fetchAddressDetails = async (pincode: string) => {
-    if (pincode.length === 6) {
-      setIsLoadingPincode(true);
-      setPincodeError("");
-      try {
-        const response = await fetch(
-          `https://api.postalpincode.in/pincode/${pincode}`
-        );
-        const data = await response.json();
-
-        if (data[0].Status === "Success") {
-          const postOffice = data[0].PostOffice[0];
-          setNewAddress((prev) => ({
-            ...prev,
-            city: postOffice.District,
-            state: postOffice.State,
-          }));
-        } else {
-          setPincodeError(
-            "Invalid PIN code. Please enter city and state manually."
-          );
-          setNewAddress((prev) => ({
-            ...prev,
-            city: "",
-            state: "",
-          }));
-        }
-      } catch (error) {
-        setPincodeError(
-          "Error fetching address details. Please enter city and state manually."
-        );
-        setNewAddress((prev) => ({
-          ...prev,
-          city: "",
-          state: "",
-        }));
-      } finally {
-        setIsLoadingPincode(false);
-      }
-    }
-  };
-
-  const handlePincodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-    setNewAddress((prev) => ({ ...prev, pincode: value }));
-    if (value.length === 6) {
-      fetchAddressDetails(value);
     }
   };
 
@@ -495,7 +431,6 @@ export default function AccountPage() {
     );
 
     setIsProfileChanged(hasChanges);
-    setIsUnsavedChanges(hasChanges);
   };
 
   const handleProfileSave = async () => {
@@ -528,7 +463,6 @@ export default function AccountPage() {
       setOriginalSettings(updatedUser);
       setProfileSettings(updatedUser);
       setIsProfileChanged(false);
-      setIsUnsavedChanges(false);
 
       setToastMessage('Profile updated successfully');
       setToastType('success');
@@ -579,12 +513,6 @@ export default function AccountPage() {
                       className="object-cover w-full h-full  "
                     />
                   </div>
-                  {/* <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-md border border-gray-200 hover:bg-gray-50"
-                  >
-                    <Edit className="w-3 h-3 text-gray-600" />
-                  </button> */}
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">
@@ -621,40 +549,8 @@ export default function AccountPage() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Left Sidebar - Hidden on mobile */}
             <div className="hidden md:block w-64 flex-shrink-0">
               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                {/* Profile Summary */}
-                {/* <div className="p-6 border-b border-gray-100">
-                  <div className="flex items-center space-x-4"> */}
-                {/* <div className="relative">
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100">
-                        <Image
-                          src={profileImage}
-                          alt="Profile"
-                          width={64}
-                          height={64}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-md border border-gray-200 hover:bg-gray-50"
-                      >
-                        <Edit className="w-3 h-3 text-gray-600" />
-                      </button>
-                    </div> */}
-                {/* <div>
-                      <h2 className="text-lg font-semibold text-gray-900">
-                        John Doe
-                      </h2>
-                      <p className="text-sm text-gray-600">
-                        john.doe@example.com
-                      </p>
-                    </div> */}
-                {/* </div>
-                </div> */}
-
                 {/* Desktop Navigation Menu */}
                 <nav className="space-y-2">
                   <button
@@ -696,7 +592,6 @@ export default function AccountPage() {
                 <div className="bg-white rounded-lg shadow p-6">
                   <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
                   <div className="space-y-6">
-
                     {/* Profile Form */}
                     <form onSubmit={handleProfileSubmit} className="space-y-4">
                       <div>
@@ -822,9 +717,11 @@ export default function AccountPage() {
                               {order.items.map((item) => (
                                 <div key={item.id} className="flex items-center space-x-4">
                                   <div className="flex-shrink-0 w-16 h-16">
-                                    <img
+                                    <Image
                                       src={item.image || '/images/placeholder.jpg'}
                                       alt={item.name}
+                                      width={64}
+                                      height={64}
                                       className="w-full h-full object-cover rounded"
                                     />
                                   </div>
@@ -877,7 +774,7 @@ export default function AccountPage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {addresses.map((address: any) => (
+                      {addresses.map((address: Address) => (
                         <div key={address.id} className="p-4 border rounded-lg shadow-sm relative">
                           {address.isDefault && (
                             <span className="absolute top-2 top-24 right-3 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
@@ -885,16 +782,16 @@ export default function AccountPage() {
                             </span>
                           )}
                           <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-gray-700 font-md">{address.label}</h3>
+                            <h3 className="text-gray-700 font-md">{address.fullName}</h3>
                             <div className="flex space-x-2">
                               <button
                                 onClick={() => {
                                   setEditingAddress(address);
                                   setNewAddress({
-                                    fullName: address.label,
+                                    fullName: address.fullName,
                                     phone: address.phone,
-                                    addressLine1: address.street,
-                                    addressLine2: address.apartment || '',
+                                    addressLine1: address.addressLine1,
+                                    addressLine2: address.addressLine2 || '',
                                     city: address.city,
                                     state: address.state,
                                     pincode: address.pincode,
@@ -925,21 +822,18 @@ export default function AccountPage() {
                                           isDefault: true
                                         }),
                                       });
-
                                       if (!response.ok) {
                                         throw new Error('Failed to update address');
                                       }
-
-                                      const updatedAddress = await response.json();
                                       setAddresses(addresses.map(addr => ({
                                         ...addr,
                                         isDefault: addr.id === address.id
                                       })));
-
                                       setToastMessage('Address set as default');
                                       setToastType('success');
                                       setShowToast(true);
                                     } catch (error) {
+                                      console.error(error);
                                       setToastMessage('Failed to update address');
                                       setToastType('error');
                                       setShowToast(true);
@@ -953,10 +847,7 @@ export default function AccountPage() {
                             </div>
                           </div>
                           <p className="text-gray-600">{address.phone}</p>
-                          <p className="text-gray-600">{address.street}</p>
-                          {/* {address.apartment && (
-                            <p className="text-gray-600">{address.apartment}</p>
-                          )} */}
+                          <p className="text-gray-600">{address.addressLine1}</p>
                           <p className="text-gray-600">
                             {address.city}, {address.state} - {address.pincode}
                           </p>

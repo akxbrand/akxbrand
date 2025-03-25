@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ChevronDown,ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 interface Category {
   id: string;

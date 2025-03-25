@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ChevronRight, Star } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import Toast from '@/components/ui/Toast';
 
@@ -123,7 +123,6 @@ export default function TopProducts() {
             }}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg hover:scale-110 transition-all duration-200"
           >
-            {/* <ChevronRight className="h-6 w-6 text-gray-600" /> */}
           </button>
           <div ref={scrollContainerRef} className="flex overflow-x-auto scrollbar-hide px-2 scroll-smooth">
             <div className="flex space-x-4 pb-2 mx-auto">

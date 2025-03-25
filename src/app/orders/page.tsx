@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import Layout from '@/components/layout/Layout';
-import Image from 'next/image';
-import { Package, ChevronRight, ShoppingBag, Truck, MapPin, CheckCircle, CreditCard, XCircle, Clock } from 'lucide-react';
+// import Image from 'next/image';
+import { Package, ChevronRight, ShoppingBag, Truck, CheckCircle, XCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Preloader from '@/components/ui/preloader';
@@ -27,7 +26,7 @@ interface Order {
 }
 
 export default function OrdersPage() {
-  const { data: session, status } = useSession();
+  // const { data: session, status } = useSession();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);

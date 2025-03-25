@@ -584,12 +584,12 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                             ₹{product.sizes.find(s => s.size === selectedSize)?.oldPrice?.toLocaleString('en-IN')}
                           </span>
                           <span className="text-md font-medium text-green-600">
-                            {Math.round(
-                              ((product.sizes.find(s => s.size === selectedSize)?.oldPrice! -
-                                product.sizes.find(s => s.size === selectedSize)?.price!) /
-                                product.sizes.find(s => s.size === selectedSize)?.oldPrice!) *
-                              100
-                            )}% off
+                            {(() => {
+                              const selectedSizeData = product.sizes.find(s => s.size === selectedSize);
+                              const oldPrice = selectedSizeData?.oldPrice ?? 0;
+                              const price = selectedSizeData?.price ?? 0;
+                              return oldPrice > 0 ? `${Math.round(((oldPrice - price) / oldPrice) * 100)}% off` : '';
+                            })()}
 
                           </span>
                           {product.isLimitted && (
@@ -938,14 +938,22 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             {activeSection === 'features' && (
               <div className="pb-6 px-4">
                 <ul className="space-y-2">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-gray-600">
-                      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {feature}
-                    </li>
-                  ))}
+                  {selectedSize && product.sizes.find(s => s.size === selectedSize)?.uniqueFeatures ? (
+                    typeof product.sizes.find(s => s.size === selectedSize)?.uniqueFeatures === 'string' ? (
+                      product.sizes.find(s => s.size === selectedSize)?.uniqueFeatures?.split('\n').map((feature, index) => (
+                        <li key={index} className="flex items-center text-gray-600">
+                          <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          {feature}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-gray-600">No unique features available for this size</li>
+                    )
+                  ) : (
+                    <li className="text-gray-600">Select a size to see unique features</li>
+                  )}
                 </ul>
               </div>
             )}
@@ -1015,9 +1023,24 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             {activeSection === 'care' && (
               <div className="pb-6 px-4">
                 <ul className="space-y-2 text-sm text-gray-600">
-                  {product.careInstructions?.map((instruction, index) => (
-                    <li key={index}>{instruction}</li>
-                  ))}
+                  {selectedSize && product.sizes.find(s => s.size === selectedSize)?.careInstructions ? (
+                    typeof product.sizes.find(s => s.size === selectedSize)?.careInstructions === 'string' ? (
+                      product.sizes.find(s => s.size === selectedSize)?.careInstructions?.split('\n').map((instruction, index) => (
+                        <li key={index} className="flex items-start space-x-2">
+                          <span className="mt-1">
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </span>
+                          <span>{instruction}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-gray-600">No care instructions available for this size</li>
+                    )
+                  ) : (
+                    <li className="text-gray-600">Select a size to see care instructions</li>
+                  )}
                 </ul>
               </div>
             )}

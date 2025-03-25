@@ -47,7 +47,7 @@ const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ order }) => {
       <div className="flex justify-between items-start mb-10 border-b pb-6">
         <div className="flex flex-col">
           <div className="flex items-center mb-4">
-            <img
+            <Image
               src="/images/brand-logo.png"
               alt="Brand Logo"
               width="150"

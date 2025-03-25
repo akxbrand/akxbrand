@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       }
     });
 
-    // Remove password from response
+    // Remove password from response using object destructuring
     const { password: _, ...userWithoutPassword } = user;
 
     return NextResponse.json(

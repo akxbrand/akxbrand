@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, User, Search, Menu, X, ChevronDown } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
@@ -9,7 +9,7 @@ import AnnouncementBar from './AnnouncementBar';
 import Image from 'next/image';
 import CategoryMenu from '../ui/CategoryMenu';
 
-import { FiShoppingCart, FiUser, FiPackage } from 'react-icons/fi';
+import { FiPackage } from 'react-icons/fi';
 
 interface HeaderProps {
   onMobileMenuClick: () => void;

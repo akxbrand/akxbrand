@@ -57,7 +57,7 @@ export default function Contact() {
         <div className="text-center py-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Contact Us</h1>
           <p className="text-gray-600 max-w-2xl mx-auto px-4">
-            We're here to help with any questions about our products or services. Reach out to us and we'll respond as soon as we can.
+            We&apos;re here to help with any questions about our products or services. Reach out to us and we&apos;ll respond as soon as we can.
           </p>
         </div>
 

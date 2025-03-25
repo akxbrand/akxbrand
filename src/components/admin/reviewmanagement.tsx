@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Review, ReviewStats } from '@/types/review';
-import { Star, Flag, Eye, EyeOff, Trash2, MessageSquare, ImageIcon, Video } from 'lucide-react';
+import { Star, Flag, Trash2, MessageSquare, ImageIcon, Video } from 'lucide-react';
 import NextImage from 'next/image';
 import Toast from '@/components/ui/Toast';
 

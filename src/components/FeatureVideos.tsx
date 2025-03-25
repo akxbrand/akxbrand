@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Volume2, VolumeX, } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectCoverflow } from 'swiper/modules';
 import '@/styles/video-carousel.css';
@@ -9,7 +9,6 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
-import type { Swiper as SwiperType } from 'swiper';
 import type { SwiperRef } from 'swiper/react';
 
 interface FeatureVideo {
@@ -23,7 +22,6 @@ interface FeatureVideo {
 export default function FeatureVideos() {
   const [videos, setVideos] = useState<FeatureVideo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   const containerRef = useRef<SwiperRef>(null);
@@ -31,11 +29,11 @@ export default function FeatureVideos() {
 
   useEffect(() => {
     const initialMuteStates = videos.reduce((acc, video) => {
-      acc[video.id] = isMuted;
+      acc[video.id] = true; // Set all videos to muted by default
       return acc;
     }, {} as { [key: string]: boolean });
     setVideoMuteStates(initialMuteStates);
-  }, [videos, isMuted]);
+  }, [videos]);
 
   const toggleVideoMute = (videoId: string) => {
     setVideoMuteStates(prev => {
@@ -67,30 +65,7 @@ export default function FeatureVideos() {
     fetchVideos();
   }, []);
 
-  const handleSlideChange = (swiper: any) => {
-    const activeIndex = swiper.activeIndex;
-    const slides = swiper.slides;
-
-    // Pause all videos first
-    Object.entries(videoRefs.current).forEach(([id, video]) => {
-      if (video) {
-        video.pause();
-        if (activeVideoId === id) {
-          setActiveVideoId(null);
-        }
-      }
-    });
-
-    // Play the center video
-    if (slides[activeIndex]) {
-      const videoElement = slides[activeIndex].querySelector('video');
-      if (videoElement) {
-        const videoId = videoElement.dataset.videoId;
-        setActiveVideoId(videoId);
-        videoElement.play().catch((error : any) => console.log('Play on center failed:', error));
-      }
-    }
-  };
+  
 
   const handleVideoHover = (videoId: string, isHovering: boolean) => {
     const video = videoRefs.current[videoId];

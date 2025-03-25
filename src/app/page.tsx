@@ -1,7 +1,5 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
@@ -12,7 +10,6 @@ import Header from '@/components/layout/Header';
 import MobileMenu from '@/components/layout/MobileMenu';
 import { useState, useEffect } from 'react';
 import Footer from '@/components/layout/Footer';
-import { Section } from 'lucide-react';
 import SubCategoryModal from '@/components/ui/SubCategoryModal';
 import TopProducts from '@/components/TopProducts';
 import Preloader from '@/components/ui/preloader';
@@ -34,8 +31,8 @@ import FeatureVideos from '@/components/FeatureVideos';
 
 
 export default function Home() {
-  const { data: session } = useSession();
-  const router = useRouter();
+  // const { data: session } = useSession();
+  // const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isSubCategoryModalOpen, setIsSubCategoryModalOpen] = useState(false);
@@ -47,7 +44,6 @@ export default function Home() {
   const [bestSellers, setBestSellers] = useState<Array<any>>([]);
   const [bestSellersLoading, setBestSellersLoading] = useState(true);
   const [featuredReviews, setFeaturedReviews] = useState<FeaturedReview[]>([]);
-  const [featuredReviewsLoading, setFeaturedReviewsLoading] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
@@ -66,9 +62,7 @@ export default function Home() {
         }
       } catch (error) {
         console.error('Error fetching featured reviews:', error);
-      } finally {
-        setFeaturedReviewsLoading(false);
-      }
+      } 
     };
 
     fetchFeaturedReviews();

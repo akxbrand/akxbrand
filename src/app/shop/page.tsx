@@ -35,7 +35,6 @@ export default function ShopPage() {
   const [sortBy, setSortBy] = useState('newest');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState<Product[]>([]);
@@ -129,33 +128,6 @@ export default function ShopPage() {
     setCurrentPage(1); // Reset to first page when filter changes
   };
 
-  // const handleMaterialChange = (material: string) => {
-  //   setSelectedMaterials(prev =>
-  //     prev.includes(material)
-  //       ? prev.filter(m => m !== material)
-  //       : [...prev, material]
-  //   );
-  //   setCurrentPage(1);
-  // };
-
-  // const handleColorChange = (color: string) => {
-  //   setSelectedColors(prev =>
-  //     prev.includes(color)
-  //       ? prev.filter(c => c !== color)
-  //       : [...prev, color]
-  //   );
-  //   setCurrentPage(1);
-  // };
-
-  // const handleSizeChange = (size: string) => {
-  //   setSelectedSizes(prev =>
-  //     prev.includes(size)
-  //       ? prev.filter(s => s !== size)
-  //       : [...prev, size]
-  //   );
-  //   setCurrentPage(1);
-  // };
-
   const handleSubcategoryChange = (subcategoryId: string) => {
     setSelectedSubcategories(prev =>
       prev.includes(subcategoryId)
@@ -168,9 +140,6 @@ export default function ShopPage() {
   const handleClearAll = () => {
     setPriceRange({ min: 0, max: 100000 });
     setSelectedCategories([]);
-    // setSelectedMaterials([]);
-    // setSelectedColors([]);
-    setSelectedSizes([]);
     setCurrentPage(1);
   };
 

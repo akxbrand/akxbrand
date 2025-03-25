@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Layout from '@/components/layout/Layout';
 import { useRouter } from 'next/navigation';
-import { loadScript, initializeRazorpay } from '@/utils/razorpay';
+import { initializeRazorpay } from '@/utils/razorpay';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 import { formatCurrency } from '@/utils/currency';
@@ -44,11 +44,9 @@ export default function CheckoutPage() {
     isDefault: false
   });
   const [formErrors, setFormErrors] = useState<Partial<Address>>({});
-  const [isLoadingPincode, setIsLoadingPincode] = useState(false);
+  // const [isLoadingPincode, setIsLoadingPincode] = useState(false);
   const [pincodeError, setPincodeError] = useState('');
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
@@ -80,6 +78,7 @@ export default function CheckoutPage() {
       });
 
       // After successful payment and order creation
+      const data = await response.json();
       if (appliedCoupon) {
         await fetch('/api/coupons/use', {
           method: 'POST',
@@ -92,8 +91,6 @@ export default function CheckoutPage() {
           }),
         });
       }
-  
-      const data = await response.json();
       if (response.ok) {
         setCouponDiscount(data.discount);
         setAppliedCoupon(data.couponDetails);
@@ -202,76 +199,6 @@ export default function CheckoutPage() {
       if (defaultAddress) setSelectedAddressId(defaultAddress.id);
     } catch (error) {
       console.error('Error fetching addresses:', error);
-    }
-  };
-
-  const handlePayment = async () => {
-    if (!selectedAddressId) {
-      showToastMessage('Please select a delivery address', 'error');
-      return;
-    }
-
-    setIsProcessingPayment(true);
-    setPaymentError('');
-    setPaymentError('');
-
-    try {
-      const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
-      const orderData = {
-        items: cartItems,
-        shippingAddress: selectedAddress,
-        couponDiscount: couponDiscount
-      };
-
-      const { orderId, amount, currency, dbOrderId } = await createRazorpayOrder(orderData);
-
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: amount,
-        currency: currency,
-        name: 'Himanshi Ecom',
-        description: 'Purchase Payment',
-        order_id: orderId,
-        handler: async (response: any) => {
-          try {
-            const verificationResponse = await fetch('/api/payment/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-                dbOrderId: dbOrderId
-              })
-            });
-
-            if (verificationResponse.ok) {
-              router.push(`/orders/${dbOrderId}?success=true`);
-            } else {
-              throw new Error('Payment verification failed');
-            }
-          } catch (error) {
-            console.error('Payment verification error:', error);
-            setPaymentError('Payment verification failed. Please contact support.');
-          }
-        },
-        prefill: {
-          name: selectedAddress?.label,
-          contact: selectedAddress?.phone
-        },
-        theme: {
-          color: '#3B82F6'
-        }
-      };
-
-      const razorpayInstance = await initializeRazorpay(options);
-      razorpayInstance.open();
-    } catch (error) {
-      console.error('Payment initialization error:', error);
-      setPaymentError('Failed to initialize payment. Please try again.');
-      showToastMessage('Payment initialization failed', 'error');
-    } finally {
-      setIsProcessingPayment(false);
     }
   };
 
@@ -413,6 +340,7 @@ export default function CheckoutPage() {
 
       const orderData = await response.json();
       
+      const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.amount,
@@ -513,7 +441,7 @@ export default function CheckoutPage() {
 
   const fetchAddressDetails = async (pincode: string) => {
     if (pincode.length === 6) {
-      setIsLoadingPincode(true);
+      // setIsLoadingPincode(true);
       setPincodeError('');
       try {
         const response = await fetch(
@@ -537,15 +465,14 @@ export default function CheckoutPage() {
           }));
         }
       } catch (error) {
+        console.error('Error fetching address details:', error);
         setPincodeError('Error fetching address details. Please enter city and state manually.');
         setNewAddress(prev => ({
           ...prev,
           city: '',
           state: '',
         }));
-      } finally {
-        setIsLoadingPincode(false);
-      }
+      } 
     }
   };
 

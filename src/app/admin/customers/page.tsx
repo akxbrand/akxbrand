@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import CustomerStatusBadge from '@/components/admin/CustomerStatusBadge';
 import { Customer, CustomerStatus } from '@/types/customer';
-import { Eye, Mail, Phone, ExternalLink, Trash2 } from 'lucide-react';
+import { Mail, Phone, Trash2 } from 'lucide-react';
 import Toast from '@/components/ui/Toast';
 
 export default function CustomersPage() {
@@ -54,8 +54,12 @@ export default function CustomersPage() {
         throw new Error(data.error || 'Failed to fetch customers');
       }
     } catch (error: any) {
-      console.error('Error fetching customers:', error);
-      setToastMessage(error.message || 'Error fetching customers');
+      if (error instanceof Error) {
+        console.error('Error fetching customers:', error);
+        setToastMessage(error.message || 'Error fetching customers');
+      } else {
+        setToastMessage('Error fetching customers');
+      }
       setToastType('error');
       setShowToast(true);
     } finally {
@@ -88,8 +92,12 @@ export default function CustomersPage() {
         throw new Error(data.error || 'Failed to update customer status');
       }
     } catch (error: any) {
-      console.error('Error updating customer status:', error);
-      setToastMessage(error.message || 'Error updating customer status');
+      if (error instanceof Error) {
+        console.error('Error updating customer status:', error);
+        setToastMessage(error.message || 'Error updating customer status');
+      } else {
+        setToastMessage('Error updating customer status');
+      }
       setToastType('error');
     } finally {
       setShowToast(true);
@@ -115,8 +123,12 @@ export default function CustomersPage() {
         throw new Error(data.error);
       }
     } catch (error: any) {
-      console.error('Error deleting customer:', error);
-      setToastMessage(error.message || 'Error deleting customer');
+      if (error instanceof Error) {
+        console.error('Error deleting customer:', error);
+        setToastMessage(error.message || 'Error deleting customer');
+      } else {
+        setToastMessage('Error deleting customer');
+      }
       setToastType('error');
     } finally {
       setShowToast(true);

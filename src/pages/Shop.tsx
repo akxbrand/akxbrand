@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiGrid, FiList } from 'react-icons/fi';
 import ProductCard from '@/components/shop/ProductCard';
+import SearchBar from '@/components/common/SearchBar';
 
 interface Category {
 	id: string;
@@ -22,7 +23,6 @@ const Shop = () => {
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [products, setProducts] = useState([]);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [totalProducts, setTotalProducts] = useState(0);
 
@@ -38,7 +38,6 @@ const Shop = () => {
 				const data = await response.json();
 				if (!response.ok) throw new Error(data.error);
 
-				setProducts(data.products);
 				setTotalProducts(data.total);
 			} catch (error) {
 				console.error('Error fetching products:', error);

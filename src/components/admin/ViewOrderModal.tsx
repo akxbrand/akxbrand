@@ -10,7 +10,7 @@ const printStyles = `
 
 import React from 'react';
 import Modal from '@/components/ui/Modal';
-import { X, Download, Printer } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 import Image from 'next/image';
 
 interface OrderItem {

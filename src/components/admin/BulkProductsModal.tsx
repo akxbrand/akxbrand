@@ -6,7 +6,6 @@ import { Button } from 'primereact/button';
 import { InputNumber } from 'primereact/inputnumber';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
 import { Tag } from 'primereact/tag';
 
 interface Product {
@@ -30,7 +29,6 @@ export default function BulkProductsModal({
 }: BulkProductsModalProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     if (visible) {

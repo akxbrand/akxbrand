@@ -42,7 +42,6 @@ export default function EditProductModal({ isOpen, onClose, onSave, product }: E
   const [isLimitedTimeDeal, setIsLimitedTimeDeal] = useState(product.isLimitedTimeDeal || false);
   const [dealStartTime, setDealStartTime] = useState(product.dealStartTime || '');
   const [dealEndTime, setDealEndTime] = useState(product.dealEndTime || '');
-  const [dealQuantityLimit, setDealQuantityLimit] = useState(product.dealQuantityLimit || 0);
   const [isBestSeller, setIsBestSeller] = useState(product.isBestSeller || false);
   const [isNewArrival, setIsNewArrival] = useState(product.isNewArrival || false);
   const [imagePreviews, setImagePreviews] = useState<string[]>(product.images);
@@ -81,7 +80,6 @@ export default function EditProductModal({ isOpen, onClose, onSave, product }: E
     setIsLimitedTimeDeal(product.isLimitedTimeDeal || false);
     setDealStartTime(product.dealStartTime || '');
     setDealEndTime(product.dealEndTime || '');
-    setDealQuantityLimit(product.dealQuantityLimit || 0);
     setIsTop10(product.isTop10 || false);
     setIsLimitted(product.isLimitted || false);
     setImagePreviews(product.images);
@@ -146,26 +144,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product }: E
     setImageError(newImages.length < 3 ? 'Please add at least 3 product images' : '');
   };
 
-  const handleAddSize = () => {
-    if (currentSize.size && currentSize.price > 0) {
-      setSizes([...sizes, currentSize]);
-      setCurrentSize({
-        size: '',
-        description: '',
-        uniqueFeatures:'',
-    productDetails:'',
-    careInstructions:'',
-    deliveryReturns:'',
-        oldPrice: 0,
-        price: 0,
-        stock: 0,
-        isLimitedTimeDeal: false,
-        dealStartTime: '',
-        dealEndTime: '',
-        dealQuantityLimit: 0
-      });
-    }
-  };
+  
 
   const handleRemoveSize = (index: number) => {
     setSizes(sizes.filter((_, i) => i !== index));
@@ -500,7 +479,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product }: E
                             type="datetime-local"
                             value={currentSize.dealStartTime}
                             onChange={(e) => setCurrentSize({ ...currentSize, dealStartTime: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                             required={currentSize.isLimitedTimeDeal}
                           />
                         </div>
@@ -511,7 +490,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product }: E
                             type="datetime-local"
                             value={currentSize.dealEndTime}
                             onChange={(e) => setCurrentSize({ ...currentSize, dealEndTime: e.target.value })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                             required={currentSize.isLimitedTimeDeal}
                           />
                         </div>
@@ -522,7 +501,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product }: E
                             type="number"
                             value={currentSize.dealQuantityLimit}
                             onChange={(e) => setCurrentSize({ ...currentSize, dealQuantityLimit: Number(e.target.value) })}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="w-full p-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                             placeholder="Maximum quantity for deal"
                             min="0"
                           />

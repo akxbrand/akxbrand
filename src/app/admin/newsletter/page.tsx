@@ -21,6 +21,27 @@ export default function NewsletterPage() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
+  const fetchSubscribers = async () => {
+    try {
+      const response = await fetch('/api/admin/newsletter');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.success) {
+        setSubscribers(data.subscribers);
+        setFilteredSubscribers(data.subscribers);
+      } else {
+        throw new Error(data.error || 'Failed to fetch subscribers');
+      }
+    } catch (error: unknown) {
+      const apiError = error as Error;
+      showToastMessage(apiError.message || 'Error fetching subscribers', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchSubscribers();
   }, []);
@@ -43,27 +64,6 @@ export default function NewsletterPage() {
     return () => clearTimeout(debounceTimeout);
   }, [searchQuery, subscribers]);
 
-  const fetchSubscribers = async () => {
-    try {
-      const response = await fetch('/api/admin/newsletter');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      if (data.success) {
-        setSubscribers(data.subscribers);
-        setFilteredSubscribers(data.subscribers);
-      } else {
-        throw new Error(data.error || 'Failed to fetch subscribers');
-      }
-    } catch (error: any) {
-    //   console.error('Error fetching subscribers:', error);
-      showToastMessage(error.message || 'Error fetching subscribers', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleStatusChange = async (subscriberId: string, newStatus: string) => {
     try {
       const response = await fetch('/api/admin/newsletter', {
@@ -79,9 +79,9 @@ export default function NewsletterPage() {
       } else {
         throw new Error(data.error);
       }
-    } catch (error: any) {
-    //   console.error('Error updating subscriber status:', error);
-      showToastMessage(error.message || 'Error updating subscriber status', 'error');
+    } catch (error: unknown) {
+      const apiError = error as Error;
+      showToastMessage(apiError.message || 'Error updating subscriber status', 'error');
     }
   };
 
@@ -132,10 +132,10 @@ export default function NewsletterPage() {
         } else {
           throw new Error(data.error);
         }
-      } catch (error: any) {
-        // console.error('Error deleting subscriber:', error);
-        showToastMessage(error.message || 'Error deleting subscriber', 'error');
-      }
+      } catch (error: unknown) {
+      const apiError = error as Error;
+      showToastMessage(apiError.message || 'Error deleting subscriber', 'error');
+    }
     }
   };
 

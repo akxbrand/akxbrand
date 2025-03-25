@@ -31,28 +31,7 @@ export async function POST(req: Request) {
     const result = await prisma.$transaction(async (tx) => {
       // Verify stock availability for all items
       for (const item of cart.items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          include: {
-            reservations: {
-              where: {
-                status: 'pending',
-                expiresAt: { gt: new Date() }
-              }
-            }
-          }
-        });
-
-        if (!product) {
-          throw new Error(`Product ${item.productId} not found`);
-        }
-
-        const reservedQuantity = product.reservations.reduce(
-          (sum, res) => sum + res.quantity,
-          0
-        );
-
-        const availableStock = product.stock - reservedQuantity;
+        const availableStock = await getAvailableStock(item.productId);
         if (availableStock < item.quantity) {
           throw new Error(
             `Insufficient stock for ${item.product.name}. Available: ${availableStock}`
@@ -81,7 +60,7 @@ export async function POST(req: Request) {
       return { reservations, expiresAt };
     });
 
-    const { reservations, expiresAt } = result;
+    const { reservations } = result;
 
     return NextResponse.json({
       reservationIds: reservations.map(r => r.id),

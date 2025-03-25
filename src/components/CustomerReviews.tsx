@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectCoverflow } from 'swiper/modules';
@@ -101,7 +100,7 @@ export default function CustomerReviews({ reviews }: { reviews: Review[] }) {
                     </div>
                   </div>
                 </div>
-                <p className="review-content">"{review.text}"</p>
+                <p className="review-content">&quot;{review.text}&quot;</p>
                 {review.media && review.media.length > 0 && (
                   <div className="review-media-grid">
                     {review.media.map((media) => (

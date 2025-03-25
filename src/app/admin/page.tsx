@@ -2,16 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import Image from 'next/image';
 import { 
   ShoppingCart, 
-  Package, 
   Flag, 
-  BarChart3,
   Users,
   IndianRupee,
   TrendingUp,
-  Activity
 } from 'lucide-react';
 
 interface DashboardData {

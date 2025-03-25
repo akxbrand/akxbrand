@@ -46,8 +46,10 @@ export default function CouponsPage() {
       } else {
         throw new Error(data.error || 'Failed to fetch coupons');
       }
-    } catch (error) {
-      setToastMessage('Error fetching coupons');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error fetching coupons';
+      console.error('Error fetching coupons:', errorMessage);
+      setToastMessage(errorMessage);
       setToastType('error');
       setShowToast(true);
     } finally {
@@ -71,8 +73,10 @@ export default function CouponsPage() {
           throw new Error(data.error || 'Failed to delete coupon');
         }
       }
-    } catch (error) {
-      setToastMessage('Error deleting coupon');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error deleting coupon';
+      console.error('Error deleting coupon:', errorMessage);
+      setToastMessage(errorMessage);
       setToastType('error');
     } finally {
       setShowToast(true);
@@ -98,8 +102,10 @@ export default function CouponsPage() {
       } else {
         throw new Error(data.error || 'Failed to add coupon');
       }
-    } catch (error) {
-      setToastMessage('Error adding coupon');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error adding coupon';
+      console.error('Error adding coupon:', errorMessage);
+      setToastMessage(errorMessage);
       setToastType('error');
     } finally {
       setShowToast(true);
@@ -128,8 +134,10 @@ export default function CouponsPage() {
       } else {
         throw new Error(data.error || 'Failed to update coupon');
       }
-    } catch (error) {
-      setToastMessage('Error updating coupon');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error updating coupon';
+      console.error('Error updating coupon:', errorMessage);
+      setToastMessage(errorMessage);
       setToastType('error');
     } finally {
       setShowToast(true);
@@ -159,7 +167,7 @@ export default function CouponsPage() {
             </div>
           ) : coupons.length === 0 ? (
             <div className="text-center p-8 text-gray-500">
-              No coupons found. Click "Add New Coupon" to create one.
+              No coupons found. Click &quot;Add New Coupon&quot; to create one.
             </div>
           ) : (
             <table className="w-full">

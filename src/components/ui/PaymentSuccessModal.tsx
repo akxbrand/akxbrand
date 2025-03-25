@@ -60,7 +60,7 @@ export default function PaymentSuccessModal({
 
         <div className="mt-6">
           <p className="text-sm text-gray-600">
-            We'll send you shipping confirmation and an order update via email.
+            We&apos;ll send you shipping confirmation and an order update via email.
           </p>
         </div>
 

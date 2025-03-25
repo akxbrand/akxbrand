@@ -47,7 +47,7 @@ export default function ReturnPolicy() {
             </section>
 
             <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-4 text-gray-900">What We Don't Accept</h2>
+              <h2 className="text-2xl font-semibold mb-4 text-gray-900">What We Don&apos;t Accept</h2>
               <div className="bg-gray-50 p-6 rounded-lg">
                 <ul className="list-disc list-inside text-gray-600 space-y-2">
                   <li>Correct Orders: Products that match your order exactly cannot be returned</li>
@@ -75,7 +75,7 @@ export default function ReturnPolicy() {
               <div className="bg-gray-50 p-6 rounded-lg space-y-4">
                 <ul className="list-disc list-inside text-gray-600">
                   <li>Approved returns will be refunded, excluding shipping costs</li>
-                  <li>We reserve the right to reject returns that don't meet these conditions</li>
+                  <li>We reserve the right to reject returns that don&apos;t meet these conditions</li>
                   <li>Only one return and exchange request will be entertained per order</li>
                   <li>By placing an order with us, you agree to these terms and conditions</li>
                 </ul>
